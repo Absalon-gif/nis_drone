@@ -1,26 +1,27 @@
 import time
 from pymavlink import mavutil
 
+# Change port to 50002
+connection = mavutil.mavlink_connection('udpout:127.0.0.1:50002')
 
-def start_drone():
-    # Replace 192.168.4.1 with the drone's actual Wi-Fi IP address
-    master = mavutil.mavlink_connection('udpout:192.168.4.2:14550')
 
-    print("Waiting for GCS heartbeat...")
-    master.wait_heartbeat()
-    print("GCS heartbeat received.")
-
+# Set up the heartbeat message
+def send_heartbeat():
     while True:
-        master.mav.heartbeat_send(
-            type=mavutil.mavlink.MAV_TYPE_QUADROTOR,
-            autopilot=mavutil.mavlink.MAV_AUTOPILOT_GENERIC,
+        # Send a heartbeat message to the GCS
+        connection.mav.heartbeat_send(
+            type=mavutil.mavlink.MAV_TYPE_GCS,
+            autopilot=mavutil.mavlink.MAV_AUTOPILOT_INVALID,
             base_mode=0,
             custom_mode=0,
             system_status=mavutil.mavlink.MAV_STATE_ACTIVE
         )
+
+        # Log to console to verify the heartbeat is being sent
         print("Heartbeat sent to GCS.")
+
         time.sleep(1)
 
 
-if __name__ == "__main__":
-    start_drone()
+# Start the heartbeat message loop
+send_heartbeat()
